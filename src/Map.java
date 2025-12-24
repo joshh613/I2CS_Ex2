@@ -41,11 +41,8 @@ public class Map implements Map2D, Serializable {
 
     @Override
     public void init(int w, int h, int v) {
-        if (w < 0) {
-            w = 0;
-        }
-        if (h < 0) {
-            h = 0;
+        if (w <= 0 || h <= 0) {
+            throw new RuntimeException("w/h invalid");
         }
 
         this.map = new int[w][h];
@@ -66,10 +63,8 @@ public class Map implements Map2D, Serializable {
         int h = arr[0].length;
 
         for (int i = 0; i < w; i++) {
-            for (int j = 0; j < h; j++) {
-                if (arr[i].length != h) {
-                    throw new RuntimeException("ragged array");
-                }
+            if (arr[i].length != h) {
+                throw new RuntimeException("ragged array");
             }
         }
 
@@ -83,8 +78,8 @@ public class Map implements Map2D, Serializable {
 
     @Override
     public int[][] getMap() {
-        int w = this.map.length;
-        int h = this.map[0].length;
+        int w = getWidth();
+        int h = getHeight();
 
         int[][] ans = new int[w][h];
         for (int i = 0; i < w; i++) {
@@ -107,6 +102,9 @@ public class Map implements Map2D, Serializable {
 
     @Override
     public int getPixel(int x, int y) {
+        if (x < 0 || y < 0 || x >= getWidth() || y >= getHeight()) {
+            throw new IndexOutOfBoundsException("x/y out of bounds");
+        }
         return this.map[x][y];
     }
 
@@ -117,6 +115,9 @@ public class Map implements Map2D, Serializable {
 
     @Override
     public void setPixel(int x, int y, int v) {
+        if (!isInside(x, y)) {
+            throw new IndexOutOfBoundsException("x/y out of bounds");
+        }
         this.map[x][y] = v;
     }
 
@@ -127,18 +128,21 @@ public class Map implements Map2D, Serializable {
 
     @Override
     public boolean isInside(Pixel2D p) {
-        if (p.getX() < this.map.length) {
-            if (p.getY() < this.map[0].length) {
-                return true;
-            }
+        if (p == null) {
+            return false;
         }
-        return false;
+
+        return isInside(p.getX(), p.getY());
     }
 
     @Override
     public boolean sameDimensions(Map2D p) {
-        if (p.getWidth() == this.map.length) {
-            if (p.getHeight() == this.map[0].length) {
+        if (p == null) {
+            return false;
+        }
+
+        if (p.getWidth() == getWidth()) {
+            if (p.getHeight() == getHeight()) {
                 return true;
             }
         }
@@ -155,7 +159,7 @@ public class Map implements Map2D, Serializable {
         int h = p.getHeight();
         for (int i = 0; i < w; i++) {
             for (int j = 0; j < h; j++) {
-                this.map[i][j] += p.getMap()[i][j];
+                this.map[i][j] += p.getPixel(i, j);
             }
         }
     }
@@ -166,19 +170,50 @@ public class Map implements Map2D, Serializable {
         int h = getHeight();
         for (int i = 0; i < w; i++) {
             for (int j = 0; j < h; j++) {
-                this.map[i][j] = (int) (this.map[i][j] * scalar);
+                this.map[i][j] = (int) Math.round(this.map[i][j] * scalar);
             }
         }
     }
 
     @Override
     public void rescale(double sx, double sy) {
-        
+        if (sx <= 0 || sy <= 0) {
+            throw new RuntimeException("sx/sy invalid");
+        }
+
+        int oldW = getWidth();
+        int oldH = getHeight();
+        int newW = (int) (oldW * sx);
+        int newH = (int) (oldH * sy);
+
+        Map newM = new Map(newW, newH, 0);
+
+        //interpolate
+        for (int i = 0; i < newW; i++) {
+            for (int j = 0; j < newH; j++) {
+                int interW = clamp((int) (i / sx), 0, oldW - 1);
+                int interH = clamp((int) (j / sy), 0, oldH - 1);
+                newM.map[i][j] = this.map[interW][interH];
+            }
+        }
+        this.map = newM.map;
     }
 
     @Override
     public void drawCircle(Pixel2D center, double rad, int color) {
+        if (!isInside(center)) {
+            return;
+        }
 
+        for (int i = 0; i < getWidth(); i++) {
+            for (int j = 0; j < getHeight(); j++) {
+                int offsetX = i - center.getX();
+                int offsetY = j - center.getY();
+                if (isInCircle(rad, offsetX, offsetY)) {
+                    setPixel(i, j, color);
+                }
+            }
+        }
     }
 
     @Override
@@ -223,6 +258,28 @@ public class Map implements Map2D, Serializable {
         return ans;
     }
 
-    ////////////////////// Private Methods ///////////////////////
+    /// /////////////////// Private Methods ///////////////////////
 
+    private boolean isInCircle(double rad, int x, int y) {
+        return x * x + y * y <= rad * rad;
+    }
+
+    private int clamp(int val, int min, int max) {
+        if (val < min) {
+            return min;
+        }
+        if (val > max) {
+            return max;
+        }
+        return val;
+    }
+
+    private boolean isInside(int x, int y) {
+        if (x >= 0 && x < getWidth()) {
+            if (y >= 0 && y < getHeight()) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
