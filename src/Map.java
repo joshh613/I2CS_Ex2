@@ -8,8 +8,7 @@ import java.io.Serializable;
  *
  */
 public class Map implements Map2D, Serializable {
-
-    // edit this class below
+    private int[][] map;
 
     /**
      * Constructs a w*h 2D raster map with an init value v.
@@ -42,86 +41,139 @@ public class Map implements Map2D, Serializable {
 
     @Override
     public void init(int w, int h, int v) {
+        if (w < 0) {
+            w = 0;
+        }
+        if (h < 0) {
+            h = 0;
+        }
 
+        this.map = new int[w][h];
+        for (int i = 0; i < w; i++) {
+            for (int j = 0; j < h; j++) {
+                this.map[i][j] = v;
+            }
+        }
     }
 
     @Override
     public void init(int[][] arr) {
+        if (arr == null || arr.length == 0 || arr[0].length == 0) {
+            throw new RuntimeException("null/empty array");
+        }
 
+        int w = arr.length;
+        int h = arr[0].length;
+
+        for (int i = 0; i < w; i++) {
+            for (int j = 0; j < h; j++) {
+                if (arr[i].length != h) {
+                    throw new RuntimeException("ragged array");
+                }
+            }
+        }
+
+        this.map = new int[w][h];
+        for (int i = 0; i < w; i++) {
+            for (int j = 0; j < h; j++) {
+                this.map[i][j] = arr[i][j];
+            }
+        }
     }
 
     @Override
     public int[][] getMap() {
-        int[][] ans = null;
+        int w = this.map.length;
+        int h = this.map[0].length;
 
+        int[][] ans = new int[w][h];
+        for (int i = 0; i < w; i++) {
+            for (int j = 0; j < h; j++) {
+                ans[i][j] = map[i][j];
+            }
+        }
         return ans;
     }
 
     @Override
     public int getWidth() {
-        int ans = -1;
-
-        return ans;
+        return this.map.length;
     }
 
     @Override
     public int getHeight() {
-        int ans = -1;
-
-        return ans;
+        return this.map[0].length;
     }
 
     @Override
     public int getPixel(int x, int y) {
-        int ans = -1;
-
-        return ans;
+        return this.map[x][y];
     }
 
     @Override
     public int getPixel(Pixel2D p) {
-        int ans = -1;
-
-        return ans;
+        return getPixel(p.getX(), p.getY());
     }
 
     @Override
     public void setPixel(int x, int y, int v) {
-
+        this.map[x][y] = v;
     }
 
     @Override
     public void setPixel(Pixel2D p, int v) {
-
+        this.setPixel(p.getX(), p.getY(), v);
     }
 
     @Override
     public boolean isInside(Pixel2D p) {
-        boolean ans = true;
-
-        return ans;
+        if (p.getX() < this.map.length) {
+            if (p.getY() < this.map[0].length) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public boolean sameDimensions(Map2D p) {
-        boolean ans = false;
-
-        return ans;
+        if (p.getWidth() == this.map.length) {
+            if (p.getHeight() == this.map[0].length) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public void addMap2D(Map2D p) {
+        if (!sameDimensions(p)) {
+            return;
+        }
 
+        int w = p.getWidth();
+        int h = p.getHeight();
+        for (int i = 0; i < w; i++) {
+            for (int j = 0; j < h; j++) {
+                this.map[i][j] += p.getMap()[i][j];
+            }
+        }
     }
 
     @Override
     public void mul(double scalar) {
-
+        int w = getWidth();
+        int h = getHeight();
+        for (int i = 0; i < w; i++) {
+            for (int j = 0; j < h; j++) {
+                this.map[i][j] = (int) (this.map[i][j] * scalar);
+            }
+        }
     }
 
     @Override
     public void rescale(double sx, double sy) {
-
+        
     }
 
     @Override
@@ -142,7 +194,6 @@ public class Map implements Map2D, Serializable {
     @Override
     public boolean equals(Object ob) {
         boolean ans = false;
-
         return ans;
     }
 
@@ -150,9 +201,9 @@ public class Map implements Map2D, Serializable {
     /**
      * Fills this map with the new color (new_v) starting from p.
      * https://en.wikipedia.org/wiki/Flood_fill
-     */ public int fill(Pixel2D xy, int new_v, boolean cyclic) {
+     */
+    public int fill(Pixel2D xy, int new_v, boolean cyclic) {
         int ans = -1;
-
         return ans;
     }
 
@@ -160,18 +211,18 @@ public class Map implements Map2D, Serializable {
     /**
      * BFS like shortest the computation based on iterative raster implementation of BFS, see:
      * https://en.wikipedia.org/wiki/Breadth-first_search
-     */ public Pixel2D[] shortestPath(Pixel2D p1, Pixel2D p2, int obsColor, boolean cyclic) {
+     */
+    public Pixel2D[] shortestPath(Pixel2D p1, Pixel2D p2, int obsColor, boolean cyclic) {
         Pixel2D[] ans = null;  // the result.
-
         return ans;
     }
 
     @Override
     public Map2D allDistance(Pixel2D start, int obsColor, boolean cyclic) {
         Map2D ans = null;  // the result.
-
         return ans;
     }
+
     ////////////////////// Private Methods ///////////////////////
 
 }
