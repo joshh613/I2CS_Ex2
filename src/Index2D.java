@@ -1,5 +1,5 @@
 public class Index2D implements Pixel2D {
-    private final int _x, _y;
+    private final int x, y;
 
     /**
      * Constructors a new Index2D
@@ -8,8 +8,8 @@ public class Index2D implements Pixel2D {
      * @param h y coord
      */
     public Index2D(int w, int h) {
-        this._x = w;
-        this._y = h;
+        this.x = w;
+        this.y = h;
     }
 
     /**
@@ -22,18 +22,18 @@ public class Index2D implements Pixel2D {
             throw new RuntimeException("other is null");
         }
 
-        this._x = other.getX();
-        this._y = other.getY();
+        this.x = other.getX();
+        this.y = other.getY();
     }
 
     @Override
     public int getX() {
-        return this._x;
+        return this.x;
     }
 
     @Override
     public int getY() {
-        return this._y;
+        return this.y;
     }
 
     @Override
@@ -42,23 +42,23 @@ public class Index2D implements Pixel2D {
             throw new RuntimeException("p2 is null");
         }
 
-        int dx = this._x - p2.getX();
-        int dy = this._y - p2.getY();
+        int dx = this.x - p2.getX();
+        int dy = this.y - p2.getY();
         return Math.sqrt(dx * dx + dy * dy);
     }
 
     @Override
     public String toString() {
-        return "(" + this._x + ", " + this._y + ")";
+        return "(" + this.x + ", " + this.y + ")";
     }
 
     @Override
     public boolean equals(Object p) {
-        if (p == null || !(p instanceof Index2D)) {
+        if (!(p instanceof Pixel2D)) {
             return false;
         }
 
-        Index2D other = (Index2D) p;
-        return this._x == other._x && this._y == other._y;
+        Pixel2D other = (Pixel2D) p;
+        return this==p || this.x == other.getX() && this.y == other.getY();
     }
 }
