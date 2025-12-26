@@ -1,4 +1,5 @@
 import java.io.Serializable;
+import java.util.LinkedList;
 
 /**
  * This class represents a 2D map (int[w][h]) as a "screen" or a raster matrix or maze over integers.
@@ -287,8 +288,50 @@ public class Map implements Map2D, Serializable {
      * https://en.wikipedia.org/wiki/Flood_fill
      */
     public int fill(Pixel2D xy, int new_v, boolean cyclic) {
-        int ans = -1;
-        return ans;
+        if (xy == null || !isInside(xy)) {
+            return 0;
+        }
+
+        int old_v = getPixel(xy);
+        if (old_v == new_v) {
+            return 0;
+        }
+
+        int w = getWidth(), h = getHeight();
+        boolean[][] visited = new boolean[w][h];
+        LinkedList<Pixel2D> pixels = new LinkedList<>();
+
+        visited[xy.getX()][xy.getY()] = true;
+        pixels.add(xy);
+        int count = 0;
+
+        int[][] dirs = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        while (!pixels.isEmpty()) {
+            Pixel2D curr = pixels.remove();
+            int x = curr.getX(), y = curr.getY();
+            setPixel(x, y, new_v);
+            count++;
+
+            for (int[] dir : dirs) {
+                int newX = x + dir[0];
+                int newY = y + dir[1];
+
+                if (cyclic) {
+                    newX = (newX + w) % w; //newX+w handles newX=-1
+                    newY = (newY + h) % h;
+                } else {
+                    if (!isInside(newX, newY)) {
+                        continue;
+                    }
+                }
+
+                if (!visited[newX][newY] && getPixel(newX, newY) == old_v) {
+                    visited[newX][newY] = true;
+                    pixels.add(new Index2D(newX, newY));
+                }
+            }
+        }
+        return count;
     }
 
     @Override
@@ -297,8 +340,60 @@ public class Map implements Map2D, Serializable {
      * https://en.wikipedia.org/wiki/Breadth-first_search
      */
     public Pixel2D[] shortestPath(Pixel2D p1, Pixel2D p2, int obsColor, boolean cyclic) {
-        Pixel2D[] ans = null;  // the result.
-        return ans;
+        if (p1 == null || p2 == null || !isInside(p1) || !isInside(p2)) {
+            return null;
+        }
+        if (getPixel(p1) == obsColor || getPixel(p2) == obsColor) {
+            return null;
+        }
+
+        int w = getWidth(), h = getHeight();
+        boolean[][] visited = new boolean[w][h];
+        Pixel2D[][] prev = new Pixel2D[w][h];
+        LinkedList<Pixel2D> pixels = new LinkedList<>();
+
+        int x1 = p1.getX(), x2 = p2.getX(), y1 = p1.getY(), y2 = p2.getY();
+        visited[x1][y1] = true;
+        pixels.add(new Index2D(x1, y1));
+
+        int[][] dirs = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        boolean found = false;
+        while (!pixels.isEmpty() && !found) {
+            Pixel2D curr = pixels.remove();
+            int x = curr.getX(), y = curr.getY();
+
+            if (x == x2 && y == y2) {
+                found = true;
+                break;
+            }
+
+            for (int[] dir : dirs) {
+                int newX = x + dir[0];
+                int newY = y + dir[1];
+
+                if (cyclic) {
+                    newX = (newX + w) % w; //newX+w handles newX=-1
+                    newY = (newY + h) % h;
+                } else {
+                    if (!isInside(newX, newY)) {
+                        continue;
+                    }
+                }
+
+                if (visited[newX][newY] || getPixel(newX, newY) == obsColor) {
+                    continue;
+                }
+
+                visited[newX][newY] = true;
+                prev[newX][newY] = curr;
+                pixels.add(new Index2D(newX, newY));
+            }
+        }
+
+        if (!visited[x2][y2]) {
+            return null;
+        }
+        return finalPath(prev, x2, y2);
     }
 
     @Override
@@ -350,5 +445,22 @@ public class Map implements Map2D, Serializable {
             int x = (int) Math.round(y * m + b);
             setPixel(x, y, color);
         }
+    }
+
+    private Pixel2D[] finalPath(Pixel2D[][] prev, int x2, int y2) {
+        int len = 0;
+        Pixel2D pixel = new Index2D(x2, y2);
+        while (pixel != null) {
+            len++;
+            pixel = prev[pixel.getX()][pixel.getY()];
+        }
+
+        Pixel2D[] path = new Pixel2D[len];
+        pixel = new Index2D(x2, y2);
+        for (int i = len - 1; i >= 0; i--) {
+            path[i] = pixel;
+            pixel = prev[pixel.getX()][pixel.getY()];
+        }
+        return path;
     }
 }
