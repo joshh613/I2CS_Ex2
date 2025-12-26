@@ -5,11 +5,11 @@ See [here](https://docs.google.com/document/d/1BtSldHciAGqjccYC3d7BKvWqIljfxKeJ)
 ## Tasks:
 
 - [x] Implement `Index2D.java`
-- [ ] Add `Index2DTest.java`
+- [x] Add `Index2DTest.java`
 - [ ] Implement the Map class in `Map.java` (based on the interface in `Map2D.java`), including tests and documentation
 - [ ] Implement the Ex2_GUI class in `Ex2_GUI.java` (use `StdDraw.java` from class 4, see below)
 - [ ] Complete `README.md` and add images of the output from `Ex2_GUI.java`
-- [ ] Make the repo private and submit the assignment
+- [ ] Make the repo public and submit the assignment
 
 ## Links:
 
