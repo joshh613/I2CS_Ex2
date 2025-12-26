@@ -248,13 +248,36 @@ public class Map implements Map2D, Serializable {
 
     @Override
     public void drawRect(Pixel2D p1, Pixel2D p2, int color) {
+        if (p1 == null || p2 == null || !isInside(p1) || !isInside(p2)) {
+            return;
+        }
 
+        for (int x = p1.getX(); x <= p2.getX(); x++) {
+            for (int y = p1.getY(); y <= p2.getY(); y++) {
+                setPixel(x, y, color);
+            }
+        }
     }
 
     @Override
     public boolean equals(Object ob) {
-        boolean ans = false;
-        return ans;
+        if (!(ob instanceof Map)) {
+            return false;
+        }
+
+        Map op = (Map) ob;
+        if (!sameDimensions(op)) {
+            return false;
+        }
+
+        for (int x = 0; x < getWidth(); x++) {
+            for (int y = 0; y < getHeight(); y++) {
+                if (op.getPixel(x, y) != getPixel(x, y)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     @Override
