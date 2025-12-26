@@ -252,8 +252,9 @@ public class Map implements Map2D, Serializable {
             return;
         }
 
-        for (int x = p1.getX(); x <= p2.getX(); x++) {
-            for (int y = p1.getY(); y <= p2.getY(); y++) {
+        int x1 = p1.getX(), x2 = p2.getX(), y1 = p1.getY(), y2 = p2.getY();
+        for (int x = Math.min(x1, x2); x <= Math.max(x1, x2); x++) {
+            for (int y = Math.min(y1, y2); y <= Math.max(y1, y2); y++) {
                 setPixel(x, y, color);
             }
         }
