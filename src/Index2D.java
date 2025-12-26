@@ -49,7 +49,7 @@ public class Index2D implements Pixel2D {
 
     @Override
     public String toString() {
-        return "(" + this.x + ", " + this.y + ")";
+        return "(" + this.x + "," + this.y + ")";
     }
 
     @Override
@@ -59,6 +59,6 @@ public class Index2D implements Pixel2D {
         }
 
         Pixel2D other = (Pixel2D) p;
-        return this==p || this.x == other.getX() && this.y == other.getY();
+        return this == p || this.x == other.getX() && this.y == other.getY();
     }
 }
