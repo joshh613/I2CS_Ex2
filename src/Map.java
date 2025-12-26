@@ -218,7 +218,32 @@ public class Map implements Map2D, Serializable {
 
     @Override
     public void drawLine(Pixel2D p1, Pixel2D p2, int color) {
+        if (p1 == null || p2 == null || !isInside(p1) || !isInside(p2)) {
+            return;
+        }
 
+        if (p1.equals(p2)) {
+            setPixel(p1, color);
+            return;
+        }
+
+        int x1 = p1.getX(), x2 = p2.getX(), y1 = p1.getY(), y2 = p2.getY();
+        int dx = Math.abs(x2 - x1);
+        int dy = Math.abs(y2 - y1);
+
+        if (dx >= dy) { //mostly horizontal
+            if (x1 < x2) { //left to right
+                drawLineHelperX(x1, x2, y1, y2, color);
+            } else { //right to left
+                drawLineHelperX(x2, x1, y2, y1, color);
+            }
+        } else { //mostly vertical
+            if (y1 < y2) { //down to up
+                drawLineHelperY(x1, x2, y1, y2, color);
+            } else { //up to down
+                drawLineHelperY(x2, x1, y2, y1, color);
+            }
+        }
     }
 
     @Override
@@ -281,5 +306,25 @@ public class Map implements Map2D, Serializable {
             }
         }
         return false;
+    }
+
+    private void drawLineHelperX(int x1, int x2, int y1, int y2, int color) {
+        double m = (double) (y2 - y1) / (x2 - x1);
+        double b = y1 - m * x1;
+
+        for (int x = x1; x <= x2; x++) {
+            int y = (int) Math.round(x * m + b);
+            setPixel(x, y, color);
+        }
+    }
+
+    private void drawLineHelperY(int x1, int x2, int y1, int y2, int color) {
+        double m = (double) (x2 - x1) / (y2 - y1);
+        double b = x1 - m * y1;
+
+        for (int y = y1; y <= y2; y++) {
+            int x = (int) Math.round(y * m + b);
+            setPixel(x, y, color);
+        }
     }
 }
