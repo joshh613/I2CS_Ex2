@@ -5,11 +5,14 @@ import java.util.LinkedList;
  * This class represents a 2D map (int[w][h]) as a "screen" or a raster matrix or maze over integers.
  * This is the main class needed to be implemented.
  *
- * @author boaz.benmoshe
+ * @author Joshua Hall
  *
  */
 public class Map implements Map2D, Serializable {
     private int[][] map;
+    private int width, height;
+
+    private static final int[][] DIRS = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
 
     /**
      * Constructs a w*h 2D raster map with an init value v.
@@ -43,13 +46,15 @@ public class Map implements Map2D, Serializable {
     @Override
     public void init(int w, int h, int v) {
         if (w <= 0 || h <= 0) {
-            throw new RuntimeException("w/h invalid");
+            throw new IllegalArgumentException("invalid dimensions: h=" + h + ", w=" + w);
         }
 
-        this.map = new int[w][h];
-        for (int i = 0; i < w; i++) {
-            for (int j = 0; j < h; j++) {
-                this.map[i][j] = v;
+        this.width = w;
+        this.height = h;
+        map = new int[this.width][this.height];
+        for (int i = 0; i < this.width; i++) {
+            for (int j = 0; j < this.height; j++) {
+                map[i][j] = v;
             }
         }
     }
@@ -57,60 +62,56 @@ public class Map implements Map2D, Serializable {
     @Override
     public void init(int[][] arr) {
         if (arr == null || arr.length == 0 || arr[0].length == 0) {
-            throw new RuntimeException("null/empty array");
+            throw new IllegalArgumentException("null/empty array");
         }
 
-        int w = arr.length;
-        int h = arr[0].length;
+        this.width = arr.length;
+        this.height = arr[0].length;
 
-        for (int i = 0; i < w; i++) {
-            if (arr[i].length != h) {
-                throw new RuntimeException("ragged array");
+        for (int i = 0; i < this.width; i++) {
+            if (arr[i].length != this.height) {
+                throw new IllegalArgumentException("ragged array");
             }
         }
 
-        this.map = new int[w][h];
-        for (int i = 0; i < w; i++) {
-            for (int j = 0; j < h; j++) {
-                this.map[i][j] = arr[i][j];
-            }
+        map = new int[this.width][height];
+        for (int i = 0; i < this.width; i++) {
+            System.arraycopy(arr[i], 0, map[i], 0, this.height);
         }
     }
 
     @Override
     public int[][] getMap() {
-        int w = getWidth();
-        int h = getHeight();
-
-        int[][] ans = new int[w][h];
-        for (int i = 0; i < w; i++) {
-            for (int j = 0; j < h; j++) {
-                ans[i][j] = map[i][j];
-            }
+        int[][] newMap = new int[width][height];
+        for (int i = 0; i < width; i++) {
+            System.arraycopy(map[i], 0, newMap[i], 0, height);
         }
-        return ans;
+        return newMap;
     }
 
     @Override
     public int getWidth() {
-        return this.map.length;
+        return width;
     }
 
     @Override
     public int getHeight() {
-        return this.map[0].length;
+        return height;
     }
 
     @Override
     public int getPixel(int x, int y) {
-        if (x < 0 || y < 0 || x >= getWidth() || y >= getHeight()) {
+        if (x < 0 || y < 0 || x >= width || y >= height) {
             throw new IndexOutOfBoundsException("x/y out of bounds");
         }
-        return this.map[x][y];
+        return map[x][y];
     }
 
     @Override
     public int getPixel(Pixel2D p) {
+        if (p == null) {
+            throw new NullPointerException("null pixel");
+        }
         return getPixel(p.getX(), p.getY());
     }
 
@@ -119,35 +120,25 @@ public class Map implements Map2D, Serializable {
         if (!isInside(x, y)) {
             throw new IndexOutOfBoundsException("x/y out of bounds");
         }
-        this.map[x][y] = v;
+        map[x][y] = v;
     }
 
     @Override
     public void setPixel(Pixel2D p, int v) {
-        this.setPixel(p.getX(), p.getY(), v);
+        if (p == null) {
+            throw new NullPointerException("null pixel");
+        }
+        setPixel(p.getX(), p.getY(), v);
     }
 
     @Override
     public boolean isInside(Pixel2D p) {
-        if (p == null) {
-            return false;
-        }
-
-        return isInside(p.getX(), p.getY());
+        return p != null && isInside(p.getX(), p.getY());
     }
 
     @Override
     public boolean sameDimensions(Map2D p) {
-        if (p == null) {
-            return false;
-        }
-
-        if (p.getWidth() == getWidth()) {
-            if (p.getHeight() == getHeight()) {
-                return true;
-            }
-        }
-        return false;
+        return p != null && p.getWidth() == getWidth() && p.getHeight() == getHeight();
     }
 
     @Override
@@ -156,22 +147,18 @@ public class Map implements Map2D, Serializable {
             return;
         }
 
-        int w = p.getWidth();
-        int h = p.getHeight();
-        for (int i = 0; i < w; i++) {
-            for (int j = 0; j < h; j++) {
-                this.map[i][j] += p.getPixel(i, j);
+        for (int i = 0; i < p.getWidth(); i++) {
+            for (int j = 0; j < p.getHeight(); j++) {
+                map[i][j] += p.getPixel(i, j);
             }
         }
     }
 
     @Override
     public void mul(double scalar) {
-        int w = getWidth();
-        int h = getHeight();
-        for (int i = 0; i < w; i++) {
-            for (int j = 0; j < h; j++) {
-                this.map[i][j] = (int) Math.round(this.map[i][j] * scalar);
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                map[i][j] = (int) (map[i][j] * scalar); //maybe Math.round would be nicer
             }
         }
     }
@@ -179,35 +166,37 @@ public class Map implements Map2D, Serializable {
     @Override
     public void rescale(double sx, double sy) {
         if (sx <= 0 || sy <= 0) {
-            throw new RuntimeException("sx/sy invalid");
+            throw new IllegalArgumentException("sx/sy must be >0. you have: sx=" + sx + ", sy=" + sy);
         }
 
-        int oldW = getWidth();
-        int oldH = getHeight();
-        int newW = (int) (oldW * sx);
-        int newH = (int) (oldH * sy);
+        int newW = (int) (width * sx);
+        int newH = (int) (height * sy);
+        if (newW == 0 || newH == 0) {
+            throw new RuntimeException("size is 0");
+        }
 
-        Map newM = new Map(newW, newH, 0);
-
-        //interpolate
+        int[][] newM = new int[newW][newH];
         for (int i = 0; i < newW; i++) {
             for (int j = 0; j < newH; j++) {
-                int interW = clamp((int) (i / sx), 0, oldW - 1);
-                int interH = clamp((int) (j / sy), 0, oldH - 1);
-                newM.map[i][j] = this.map[interW][interH];
+                int interW = clamp((int) (i / sx), width - 1);
+                int interH = clamp((int) (j / sy), height - 1);
+                newM[i][j] = getPixel(interW, interH);
             }
         }
-        this.map = newM.map;
+
+        this.map = newM;
+        this.width = newW;
+        this.height = newH;
     }
 
     @Override
     public void drawCircle(Pixel2D center, double rad, int color) {
-        if (!isInside(center)) {
+        if (!isInside(center) || rad <= 0) {
             return;
         }
 
-        for (int i = 0; i < getWidth(); i++) {
-            for (int j = 0; j < getHeight(); j++) {
+        for (int i = 0; i < width; i++) { //maybe use the enclosing square
+            for (int j = 0; j < height; j++) {
                 int offsetX = i - center.getX();
                 int offsetY = j - center.getY();
                 if (isInCircle(rad, offsetX, offsetY)) {
@@ -263,18 +252,22 @@ public class Map implements Map2D, Serializable {
 
     @Override
     public boolean equals(Object ob) {
-        if (!(ob instanceof Map)) {
+        if (this == ob) {
+            return true;
+        }
+
+        if (!(ob instanceof Map2D)) {
             return false;
         }
 
-        Map op = (Map) ob;
-        if (!sameDimensions(op)) {
+        Map2D other = (Map2D) ob;
+        if (!sameDimensions(other)) {
             return false;
         }
 
-        for (int x = 0; x < getWidth(); x++) {
-            for (int y = 0; y < getHeight(); y++) {
-                if (op.getPixel(x, y) != getPixel(x, y)) {
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                if (getPixel(x, y) != other.getPixel(x, y)) {
                     return false;
                 }
             }
@@ -297,28 +290,26 @@ public class Map implements Map2D, Serializable {
             return 0;
         }
 
-        int w = getWidth(), h = getHeight();
-        boolean[][] visited = new boolean[w][h];
+        boolean[][] visited = new boolean[width][height];
         LinkedList<Pixel2D> pixels = new LinkedList<>();
 
         visited[xy.getX()][xy.getY()] = true;
         pixels.add(xy);
         int count = 0;
 
-        int[][] dirs = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
         while (!pixels.isEmpty()) {
             Pixel2D curr = pixels.remove();
             int x = curr.getX(), y = curr.getY();
             setPixel(x, y, new_v);
             count++;
 
-            for (int[] dir : dirs) {
+            for (int[] dir : DIRS) {
                 int newX = x + dir[0];
                 int newY = y + dir[1];
 
                 if (cyclic) {
-                    newX = (newX + w) % w; //newX+w handles newX=-1
-                    newY = (newY + h) % h;
+                    newX = (newX + width) % width; //newX+width handles newX=-1
+                    newY = (newY + height) % height;
                 } else {
                     if (!isInside(newX, newY)) {
                         continue;
@@ -347,33 +338,33 @@ public class Map implements Map2D, Serializable {
             return null;
         }
 
-        int w = getWidth(), h = getHeight();
-        boolean[][] visited = new boolean[w][h];
-        Pixel2D[][] prev = new Pixel2D[w][h];
+        if (p1.equals(p2)) {
+            return new Pixel2D[]{p1};
+        }
+
+        boolean[][] visited = new boolean[width][height];
+        Pixel2D[][] prev = new Pixel2D[width][height];
         LinkedList<Pixel2D> pixels = new LinkedList<>();
 
         int x1 = p1.getX(), x2 = p2.getX(), y1 = p1.getY(), y2 = p2.getY();
         visited[x1][y1] = true;
         pixels.add(new Index2D(x1, y1));
 
-        int[][] dirs = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
-        boolean found = false;
-        while (!pixels.isEmpty() && !found) {
+        while (!pixels.isEmpty()) {
             Pixel2D curr = pixels.remove();
             int x = curr.getX(), y = curr.getY();
 
             if (x == x2 && y == y2) {
-                found = true;
                 break;
             }
 
-            for (int[] dir : dirs) {
+            for (int[] dir : DIRS) {
                 int newX = x + dir[0];
                 int newY = y + dir[1];
 
                 if (cyclic) {
-                    newX = (newX + w) % w; //newX+w handles newX=-1
-                    newY = (newY + h) % h;
+                    newX = (newX + width) % width; //newX+width handles newX=-1
+                    newY = (newY + height) % height;
                 } else {
                     if (!isInside(newX, newY)) {
                         continue;
@@ -399,21 +390,20 @@ public class Map implements Map2D, Serializable {
     @Override
     public Map2D allDistance(Pixel2D start, int obsColor, boolean cyclic) {
         if (start == null || !isInside(start)) {
-            return null;
+            return new Map(width, height, -1);
         }
 
-        int w = getWidth(), h = getHeight();
         int x1 = start.getX(), y1 = start.getY();
         if (getPixel(x1, y1) == obsColor) {
-            return new Map(w, h, -1);
+            return new Map(width, height, -1);
         }
 
-        boolean[][] visited = new boolean[w][h];
+        boolean[][] visited = new boolean[width][height];
         visited[x1][y1] = true;
 
-        int[][] dist = new int[w][h];
-        for (int x = 0; x < w; x++) {
-            for (int y = 0; y < h; y++) {
+        int[][] dist = new int[width][height];
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
                 dist[x][y] = -1;
             }
         }
@@ -422,18 +412,17 @@ public class Map implements Map2D, Serializable {
         LinkedList<Pixel2D> pixels = new LinkedList<>();
         pixels.add(new Index2D(x1, y1));
 
-        int[][] dirs = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} };
         while (!pixels.isEmpty()) {
             Pixel2D curr = pixels.remove();
             int x = curr.getX(), y = curr.getY();
 
-            for (int[] dir : dirs) {
+            for (int[] dir : DIRS) {
                 int newX = x + dir[0];
                 int newY = y + dir[1];
 
                 if (cyclic) {
-                    newX = (newX + w) % w;
-                    newY = (newY + h) % h;
+                    newX = (newX + width) % width; //newX+width handles newX=-1
+                    newY = (newY + height) % height;
                 } else {
                     if (!isInside(newX, newY)) {
                         continue;
@@ -458,23 +447,15 @@ public class Map implements Map2D, Serializable {
         return x * x + y * y <= rad * rad;
     }
 
-    private int clamp(int val, int min, int max) {
-        if (val < min) {
-            return min;
+    private int clamp(int val, int max) {
+        if (val < 0) {
+            return 0;
         }
-        if (val > max) {
-            return max;
-        }
-        return val;
+        return Math.min(val, max);
     }
 
     private boolean isInside(int x, int y) {
-        if (x >= 0 && x < getWidth()) {
-            if (y >= 0 && y < getHeight()) {
-                return true;
-            }
-        }
-        return false;
+        return x >= 0 && x < width && y >= 0 && y < height;
     }
 
     private void drawLineHelperX(int x1, int x2, int y1, int y2, int color) {
