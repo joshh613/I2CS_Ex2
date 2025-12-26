@@ -398,8 +398,58 @@ public class Map implements Map2D, Serializable {
 
     @Override
     public Map2D allDistance(Pixel2D start, int obsColor, boolean cyclic) {
-        Map2D ans = null;  // the result.
-        return ans;
+        if (start == null || !isInside(start)) {
+            return null;
+        }
+
+        int w = getWidth(), h = getHeight();
+        int x1 = start.getX(), y1 = start.getY();
+        if (getPixel(x1, y1) == obsColor) {
+            return new Map(w, h, -1);
+        }
+
+        boolean[][] visited = new boolean[w][h];
+        visited[x1][y1] = true;
+
+        int[][] dist = new int[w][h];
+        for (int x = 0; x < w; x++) {
+            for (int y = 0; y < h; y++) {
+                dist[x][y] = -1;
+            }
+        }
+        dist[x1][y1] = 0;
+
+        LinkedList<Pixel2D> pixels = new LinkedList<>();
+        pixels.add(new Index2D(x1, y1));
+
+        int[][] dirs = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} };
+        while (!pixels.isEmpty()) {
+            Pixel2D curr = pixels.remove();
+            int x = curr.getX(), y = curr.getY();
+
+            for (int[] dir : dirs) {
+                int newX = x + dir[0];
+                int newY = y + dir[1];
+
+                if (cyclic) {
+                    newX = (newX + w) % w;
+                    newY = (newY + h) % h;
+                } else {
+                    if (!isInside(newX, newY)) {
+                        continue;
+                    }
+                }
+
+                if (visited[newX][newY] || getPixel(newX, newY) == obsColor) {
+                    continue;
+                }
+
+                visited[newX][newY] = true;
+                dist[newX][newY] = dist[x][y] + 1;
+                pixels.add(new Index2D(newX, newY));
+            }
+        }
+        return new Map(dist);
     }
 
     /// /////////////////// Private Methods ///////////////////////
