@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.Scanner;
 
 /**
@@ -15,7 +16,7 @@ import java.util.Scanner;
 public class Ex2_GUI {
     public static void drawMap(Map2D map) {
         if (map == null) {
-            System.err.println("Error: map is null");
+            System.err.println("map is null");
             return;
         }
 
@@ -83,28 +84,75 @@ public class Ex2_GUI {
      * @param mapFileName
      */
     public static void saveMap(Map2D map, String mapFileName) {
+        if (map == null) {
+            System.err.println("map is null");
+            return;
+        }
 
+        int w = map.getWidth();
+        int h = map.getHeight();
 
+        try (PrintWriter out = new PrintWriter(new File(mapFileName))) {
+            out.println(w + " " + h);
+
+            for (int x = 0; x < w; x++) {
+                for (int y = 0; y < h; y++) {
+                    out.print(map.getPixel(x, y));
+                    if (x < w - 1) {
+                        out.print(" ");
+                    }
+                }
+                out.println();
+            }
+
+            System.out.println("saved successfully");
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public static void main(String[] a) {
+    public static void main(String[] a) throws FileNotFoundException {
         String mapFile = "map.txt";
+        if (a.length > 0) {
+            mapFile = a[0];
+        }
+
         Map2D map = loadMap(mapFile);
+        if (map == null) {
+            System.err.println("map is null");
+            return;
+        }
+
         drawMap(map);
     }
 
     /// ///////////// Private functions ///////////////
 
     private static Color colorOf(int v) {
-        if (v == 0) {
-            return Color.WHITE;
-        } else if (v == 1) {
-            return Color.BLACK;
-        } else if (v == 2) {
-            return Color.BLUE;
-        } else {
-            // generic gray for any other value
-            return Color.LIGHT_GRAY;
+        switch (v) {
+            case 0:
+                return Color.WHITE;
+            case 1:
+                return Color.BLACK;
+            case 2:
+                return Color.BLUE;
+            case 3:
+                return Color.RED;
+            case 4:
+                return Color.GREEN;
+            case 5:
+                return Color.YELLOW;
+            case 6:
+                return Color.ORANGE;
+            case 7:
+                return Color.CYAN;
+            case 8:
+                return Color.MAGENTA;
+            case 9:
+                return Color.PINK;
+            default:
+                return Color.LIGHT_GRAY;
+
         }
     }
 }
