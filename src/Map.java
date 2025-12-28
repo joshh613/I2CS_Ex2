@@ -354,6 +354,13 @@ public class Map implements Map2D, Serializable {
         }
     }
 
+    /**
+     * Compares this map to another {@code Object}.
+     * They are equal if {@code ob} 1. is  an instance of {@link Map2D}, 2. has the same dimensions, 3. has the same pixel values.
+     *
+     * @param ob the reference object with which to compare.
+     * @return {@code true} iff the above 3 conditions are met.
+     */
     @Override
     public boolean equals(Object ob) {
         if (this == ob) {
@@ -379,11 +386,16 @@ public class Map implements Map2D, Serializable {
         return true;
     }
 
-    @Override
     /**
-     * Fills this map with the new color (new_v) starting from p.
-     * https://en.wikipedia.org/wiki/Flood_fill
+     * Flood fills the region starting from the pixel {@code xy}, implementing the algorithm <a href="https://en.wikipedia.org/wiki/Flood_fill">given here.</a>
+     * The option to "loop" around is toggled with {@code cyclic}. This is done using modular arithmetics.
+     *
+     * @param xy     the starting pixel
+     * @param new_v  the fill colour
+     * @param cyclic {@code true} iff we want to loop around the edge
+     * @return the number of pixels successfully filled
      */
+    @Override
     public int fill(Pixel2D xy, int new_v, boolean cyclic) {
         if (xy == null || !isInside(xy)) {
             return 0;
@@ -429,11 +441,17 @@ public class Map implements Map2D, Serializable {
         return count;
     }
 
-    @Override
     /**
-     * BFS like shortest the computation based on iterative raster implementation of BFS, see:
-     * https://en.wikipedia.org/wiki/Breadth-first_search
+     * Compute the shorted path between two given pixels using the <a href="https://en.wikipedia.org/wiki/Breadth-first_search">BFS algorithm</a>, avoiding obstacles (given by the value {@code obsColor})
+     * The option to "loop" around is toggled with {@code cyclic}. This is done using modular arithmetics.
+     *
+     * @param p1       starting pixel
+     * @param p2       finishing pixel
+     * @param obsColor the color which is addressed as an obstacle.
+     * @param cyclic   {@code true} iff we want to loop around the edge
+     * @return an array of pixels representing the path from {@code p1} to {@code p2}
      */
+    @Override
     public Pixel2D[] shortestPath(Pixel2D p1, Pixel2D p2, int obsColor, boolean cyclic) {
         if (p1 == null || p2 == null || !isInside(p1) || !isInside(p2)) {
             return null;
@@ -491,6 +509,15 @@ public class Map implements Map2D, Serializable {
         return finalPath(prev, x2, y2);
     }
 
+    /**
+     * Creates a distance map from a given starting point. Unreachable pixels are assigned the value -1.
+     * The option to "loop" around is toggled with {@code cyclic}. This is done using modular arithmetics.
+     *
+     * @param start    starting point
+     * @param obsColor the color representing obstacles
+     * @param cyclic   {@code true} iff we want to loop around the edge
+     * @return a new {@link Map} with values representing the distance from {@code start}
+     */
     @Override
     public Map2D allDistance(Pixel2D start, int obsColor, boolean cyclic) {
         if (start == null || !isInside(start)) {
