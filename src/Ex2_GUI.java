@@ -28,11 +28,11 @@ public class Ex2_GUI {
 
         StdDraw.setXscale(-0.5, width - 0.5);
         StdDraw.setYscale(-0.5, height - 0.5);
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                int v = map.getPixel(x, y);
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                int v = map.getPixel(i, j);
                 StdDraw.setPenColor(colorOf(v));
-                StdDraw.filledSquare(x, y, 0.5);
+                StdDraw.filledSquare(i, j, 0.5);
             }
         }
 
@@ -63,18 +63,18 @@ public class Ex2_GUI {
                 return null;
             }
 
-            int[][] map = new int[w][h];
-            for (int i = 0; i < w; i++) {
-                for (int j = 0; j < h; j++) {
+            Map map = new Map(new int[w][h]);
+            for (int i = 0; i < h; i++) {
+                for (int j = 0; j < w; j++) {
                     if (!in.hasNextInt()) {
                         System.err.println("invalid map");
                         return null;
                     }
-                    map[i][j] = in.nextInt();
+                    map.setPixel(j, i, in.nextInt());
                 }
             }
 
-            return new Map(map);
+            return map;
         }
     }
 
@@ -95,10 +95,10 @@ public class Ex2_GUI {
         try (PrintWriter out = new PrintWriter(new File(mapFileName))) {
             out.println(w + " " + h);
 
-            for (int x = 0; x < w; x++) {
-                for (int y = 0; y < h; y++) {
-                    out.print(map.getPixel(x, y));
-                    if (x < w - 1) {
+            for (int i = 0; i < h; i++) {
+                for (int j = 0; j < w; j++) {
+                    out.print(map.getPixel(j, i));
+                    if (j < w - 1) {
                         out.print(" ");
                     }
                 }
