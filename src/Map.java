@@ -17,18 +17,18 @@ public class Map implements Map2D, Serializable {
     /**
      * Constructs a w*h 2D raster map with an init value v.
      *
-     * @param w
-     * @param h
-     * @param v
+     * @param w width
+     * @param h height
+     * @param v default pixel value
      */
     public Map(int w, int h, int v) {
         init(w, h, v);
     }
 
     /**
-     * Constructs a square map (size*size).
+     * Constructs a square map (size*size). Has a default pixel value of v=0
      *
-     * @param size
+     * @param size used for width and height
      */
     public Map(int size) {
         this(size, size, 0);
@@ -37,7 +37,7 @@ public class Map implements Map2D, Serializable {
     /**
      * Constructs a map from a given 2D array.
      *
-     * @param data
+     * @param data 2D array of pixel values
      */
     public Map(int[][] data) {
         init(data);
