@@ -40,8 +40,14 @@ public class Ex2_GUI {
     }
 
     /**
-     * @param mapFileName
-     * @return
+     * Loads in a map file.
+     * The format is:
+     * First line contains the width and height (separated by a space)
+     * Each subsequent line contains the relevant pixel values (separated by a space)
+     *
+     * @param mapFileName The file with the width,height, and pixel values.
+     * @return a new {@link Map2D} object
+     * @throws FileNotFoundException
      */
     public static Map2D loadMap(String mapFileName) throws FileNotFoundException {
         try (Scanner in = new Scanner(new File(mapFileName))) {
@@ -78,10 +84,12 @@ public class Ex2_GUI {
         }
     }
 
+
     /**
+     * Save a {@link Map2D} object as a file.
      *
-     * @param map
-     * @param mapFileName
+     * @param map         a valid {@link Map2D} object
+     * @param mapFileName output file name
      */
     public static void saveMap(Map2D map, String mapFileName) {
         if (map == null) {
@@ -111,6 +119,12 @@ public class Ex2_GUI {
         }
     }
 
+    /**
+     * Example to demonstrate how to package works.
+     *
+     * @param a name of map file to use (optional)
+     * @throws FileNotFoundException
+     */
     public static void main(String[] a) throws FileNotFoundException {
         String mapFile = "map.txt";
         if (a.length > 0) {
