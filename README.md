@@ -9,7 +9,7 @@ See [here](https://docs.google.com/document/d/1BtSldHciAGqjccYC3d7BKvWqIljfxKeJ)
 - [ ] Implement the Map class in `Map.java` (based on the interface in `Map2D.java`), including tests and documentation
 - [ ] Implement the Ex2_GUI class in `Ex2_GUI.java` (use `StdDraw.java` from class 4, see below)
 - [ ] Complete `README.md` and add images of the output from `Ex2_GUI.java`
-- [ ] Make the repo public and submit the assignment
+- [x] Make the repo public and submit the assignment
 
 ## Links:
 
