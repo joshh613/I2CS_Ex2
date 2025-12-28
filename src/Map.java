@@ -17,8 +17,8 @@ public class Map implements Map2D, Serializable {
     /**
      * Constructs a w*h 2D raster map with an init value v.
      *
-     * @param w width
-     * @param h height
+     * @param w width (&gt; 0)
+     * @param h height (&gt; 0)
      * @param v default pixel value
      */
     public Map(int w, int h, int v) {
@@ -28,7 +28,7 @@ public class Map implements Map2D, Serializable {
     /**
      * Constructs a square map (size*size). Has a default pixel value of v=0
      *
-     * @param size used for width and height
+     * @param size used for width and height (&gt; 0)
      */
     public Map(int size) {
         this(size, size, 0);
@@ -43,6 +43,13 @@ public class Map implements Map2D, Serializable {
         init(data);
     }
 
+    /**
+     * Initialises the map to given w,h dimensions with the given v value.
+     *
+     * @param w the width of the underlying 2D array.
+     * @param h the height of the underlying 2D array.
+     * @param v the init value of all the entries in the 2D array.
+     */
     @Override
     public void init(int w, int h, int v) {
         if (w <= 0 || h <= 0) {
@@ -59,6 +66,11 @@ public class Map implements Map2D, Serializable {
         }
     }
 
+    /**
+     * Initialises the map from a 2D array (using a deep copy).
+     *
+     * @param arr a 2D int array.
+     */
     @Override
     public void init(int[][] arr) {
         if (arr == null || arr.length == 0 || arr[0].length == 0) {
@@ -80,6 +92,11 @@ public class Map implements Map2D, Serializable {
         }
     }
 
+    /**
+     * Returns a deep copy of the 2D pixel array.
+     *
+     * @return a new 2D array of size {@code width} * {@code height}
+     */
     @Override
     public int[][] getMap() {
         int[][] newMap = new int[width][height];
@@ -89,16 +106,33 @@ public class Map implements Map2D, Serializable {
         return newMap;
     }
 
+    /**
+     * Returns the number of columns in the map
+     *
+     * @return the {@code width} of the map
+     */
     @Override
     public int getWidth() {
         return width;
     }
 
+    /**
+     * Returns the number of rows in the map
+     *
+     * @return the {@code height} of the map
+     */
     @Override
     public int getHeight() {
         return height;
     }
 
+    /**
+     * Returns the pixel value at a given coord.
+     *
+     * @param x the x coordinate in range 0 to {@code width -1}
+     * @param y the y coordinate in range 0 to {@code height -1
+     * @return
+     */
     @Override
     public int getPixel(int x, int y) {
         if (x < 0 || y < 0 || x >= width || y >= height) {
@@ -107,6 +141,12 @@ public class Map implements Map2D, Serializable {
         return map[x][y];
     }
 
+    /**
+     * Returns the pixel value at a given coord.
+     *
+     * @param p the x,y coordinate (non null)
+     * @return the pixel value at {@code p}
+     */
     @Override
     public int getPixel(Pixel2D p) {
         if (p == null) {
@@ -115,6 +155,13 @@ public class Map implements Map2D, Serializable {
         return getPixel(p.getX(), p.getY());
     }
 
+    /**
+     * Sets the pixel at (x,y) to the given v value.
+     *
+     * @param x the x coordinate in range 0 to {@code width -1}
+     * @param y the y coordinate in range 0 to {@code height -1}
+     * @param v the value that the entry at the coordinate [x][y] is set to.
+     */
     @Override
     public void setPixel(int x, int y, int v) {
         if (!isInside(x, y)) {
@@ -123,6 +170,12 @@ public class Map implements Map2D, Serializable {
         map[x][y] = v;
     }
 
+    /**
+     * Sets the pixel at (x,y) to the given v value.
+     *
+     * @param p the coordinate in the map.
+     * @param v the value that the entry at the coordinate [p.x][p.y] is set to.
+     */
     @Override
     public void setPixel(Pixel2D p, int v) {
         if (p == null) {
@@ -131,19 +184,36 @@ public class Map implements Map2D, Serializable {
         setPixel(p.getX(), p.getY(), v);
     }
 
+    /**
+     * Returns {@code true} iff the given pixel lies within the bounds of the map.
+     *
+     * @param p the 2D coordinate.
+     * @return {@code true} if {@code p} is non-null AND inside the map
+     */
     @Override
     public boolean isInside(Pixel2D p) {
         return p != null && isInside(p.getX(), p.getY());
     }
 
+    /**
+     * Checks if a given map has the same dimensions as this map.
+     *
+     * @param p another map (possibly {@code null}
+     * @return {@code true} iff {@code p} is non-null AND has the same width,height
+     */
     @Override
     public boolean sameDimensions(Map2D p) {
         return p != null && p.getWidth() == getWidth() && p.getHeight() == getHeight();
     }
 
+    /**
+     * Performs element-wise addition of pixel values from another map. (Assuming the other map is NOT {@code null})
+     *
+     * @param p the map that should be added to this map.
+     */
     @Override
     public void addMap2D(Map2D p) {
-        if (!sameDimensions(p)) {
+        if (p == null || !sameDimensions(p)) {
             return;
         }
 
@@ -154,6 +224,11 @@ public class Map implements Map2D, Serializable {
         }
     }
 
+    /**
+     * Multiplies all pixel values by a given scalar. (If needed, we truncate using casting - NOT rounding)
+     *
+     * @param scalar the factor by which to multiple (double)
+     */
     @Override
     public void mul(double scalar) {
         for (int i = 0; i < width; i++) {
@@ -163,6 +238,12 @@ public class Map implements Map2D, Serializable {
         }
     }
 
+    /**
+     * Rescales the map by a given scale factor. Uses the nearest neighbor to fill in any newly created pixels.
+     *
+     * @param sx x direction scale factor (&gt; 0)
+     * @param sy y direction scale factor (&gt; 0)
+     */
     @Override
     public void rescale(double sx, double sy) {
         if (sx <= 0 || sy <= 0) {
@@ -189,6 +270,14 @@ public class Map implements Map2D, Serializable {
         this.height = newH;
     }
 
+    /**
+     * Draws a circle, centred at {@code center} with radius {@code rad}, in the colour {@code color}. We use {@code x^2+y^2<=r^2} to ensure the correct pixels are coloured.
+     * Points outside the map are ignored. Also, if the centre is outside the circle, then nothing happens.
+     *
+     * @param center centre of the circle (must be inside the map)
+     * @param rad    circle radius (&gt; 0)
+     * @param color  - the (new) color to be used in the drawing.
+     */
     @Override
     public void drawCircle(Pixel2D center, double rad, int color) {
         if (!isInside(center) || rad <= 0) {
@@ -206,6 +295,14 @@ public class Map implements Map2D, Serializable {
         }
     }
 
+    /**
+     * Draws a straight lines between two given pixels (both of which must be inside the map).
+     * If {@code p1==p2}, the that single pixel is coloured.
+     *
+     * @param p1    start point (non-null, inside the map)
+     * @param p2    end point (non-null, inside the map)
+     * @param color colour used to draw the line.
+     */
     @Override
     public void drawLine(Pixel2D p1, Pixel2D p2, int color) {
         if (p1 == null || p2 == null || !isInside(p1) || !isInside(p2)) {
@@ -236,6 +333,13 @@ public class Map implements Map2D, Serializable {
         }
     }
 
+    /**
+     * Fills in the rectangle create by the two corners {@code p1,p2} (both of which must be inside the map).
+     *
+     * @param p1    one corner
+     * @param p2    opposite corner
+     * @param color value used to fill in the rectangle
+     */
     @Override
     public void drawRect(Pixel2D p1, Pixel2D p2, int color) {
         if (p1 == null || p2 == null || !isInside(p1) || !isInside(p2)) {
