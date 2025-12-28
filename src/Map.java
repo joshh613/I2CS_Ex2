@@ -464,7 +464,9 @@ public class Map implements Map2D, Serializable {
 
         for (int x = x1; x <= x2; x++) {
             int y = (int) Math.round(x * m + b);
-            setPixel(x, y, color);
+            if (isInside(x, y)) {
+                setPixel(x, y, color);
+            }
         }
     }
 
@@ -474,7 +476,9 @@ public class Map implements Map2D, Serializable {
 
         for (int y = y1; y <= y2; y++) {
             int x = (int) Math.round(y * m + b);
-            setPixel(x, y, color);
+            if (isInside(x, y)) {
+                setPixel(x, y, color);
+            }
         }
     }
 
