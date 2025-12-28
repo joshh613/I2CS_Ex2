@@ -5,9 +5,16 @@ screen.
 
 ## Example:
 
-[!map.png]
+![Map example](map.png)
 
 See [here](https://docs.google.com/document/d/1BtSldHciAGqjccYC3d7BKvWqIljfxKeJ) for more info.
+
+## Features:
+
+- Flood fill
+- BFS based shorted path algorithm
+- Distance maps
+- Rescaling
 
 ## Tasks:
 
