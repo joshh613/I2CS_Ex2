@@ -19,7 +19,7 @@ public class Index2D implements Pixel2D {
      */
     public Index2D(Pixel2D other) {
         if (other == null) {
-            throw new RuntimeException("other is null");
+            throw new NullPointerException("other pixel is null");
         }
 
         this.x = other.getX();
@@ -39,7 +39,7 @@ public class Index2D implements Pixel2D {
     @Override
     public double distance2D(Pixel2D p2) {
         if (p2 == null) {
-            throw new RuntimeException("p2 is null");
+            throw new NullPointerException("other pixel is null");
         }
 
         int dx = this.x - p2.getX();
